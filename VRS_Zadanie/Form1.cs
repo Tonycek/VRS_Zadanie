@@ -18,13 +18,14 @@ namespace VRS_Zadanie
         private System.IO.StreamReader sr;
         private string[] files;
         private int rezimKreslenia = 0;         // ci sa kresli od svetovych suradnic (0), od aktuanej pozicie (1),...
-        private double aktualX = 100, aktualY = 100, aktualZ = 0;   // aktualne suradnice
+        private double aktualX = 0, aktualY = 0, aktualZ = 0;   // aktualne suradnice
         private double svetX = 100, svetY = 100, svetZ = 0;
         private Bitmap DrawArea;
         private Pen mypen;
         private Graphics g;
         private int nasobic = 15;
-        private const int ARMLENGTH = 150;
+        private int ARMLENGTH = 5;
+        private int ARMLENGTH1 = 3;
         private const double radTodegree = 180 / Math.PI;
         private const double degToRadian = Math.PI / 180;
         private SerialPort seriovyPort;
@@ -70,11 +71,10 @@ namespace VRS_Zadanie
             {
                 string port = listBoxZoznamPortov.GetItemText(listBoxZoznamPortov.SelectedItem);
                 seriovyPort = new SerialPort(port, 4800, Parity.None, 8, StopBits.One);
-                //seriovyPort.Open();
-                //seriovyPort.WriteLine("servusko");
-                //seriovyPort.Close();
-
                 sr = new System.IO.StreamReader(files[0]);          // znovu idem citat GCODE ktory uz mam ulozeny v premennej files[0]
+
+                ARMLENGTH = Int32.Parse(tbRameno1.Text);
+                ARMLENGTH1 = Int32.Parse(tbRameno2.Text);
 
                 string riadok;
 
@@ -302,9 +302,12 @@ namespace VRS_Zadanie
             //centY = DrawArea.Height - centY;
             g.DrawEllipse(mypen, (float)aktualX - (float)polomer + (float)posX , (float)aktualY - (float)polomer - (float)posY, (float)polomer*2, (float)polomer*2); //
             //g.DrawEllipse(mypen, ((float)aktualX - (float)polomer), ((float)aktualY - (float)polomer), (float)polomer, (float)polomer); //
-            //g.DrawLine(mypen, (float)0, (float)0, (float)50, (float)100);
+            g.DrawLine(mypen, (float)0, (float)-10, (float)300, (float)310);
             double bodX = aktualX + posX;
             double bodY =  DrawArea.Height - aktualY + posY;
+
+            double iujf = DrawArea.Height;
+            double fiune = DrawArea.Width;
             armTo(bodX, bodY, 'K', 1);
             //aktualX = aktualX - polomer / 2;
             //aktualY = aktualY - polomer / 2;
@@ -415,6 +418,17 @@ namespace VRS_Zadanie
             return Math.Acos((Math.Pow(b, 2) + Math.Pow(c, 2) - Math.Pow(a, 2)) / (2 * b * c));
         }
 
+        private void button1_Click(object sender, EventArgs e)
+        {
+            aktualX = 0;
+            aktualY = 300;
+            aktualZ = 0;
+            textBox1.Text = "";
+            textBox1.Refresh();
+            textBoxVypisUhly.Text = "";
+            textBoxVypisUhly.Refresh();
+        }
+
         double constrain(double value, double min, double max)
         {
             double result = 0;
@@ -438,27 +452,41 @@ namespace VRS_Zadanie
             //a1 = a1 * degToRadian;
             //a2 = a2 * degToRadian;
 
-            double deg1 = 90 - constrain((Math.PI - a1) * radTodegree, 0, 360);
-            double deg2 = 360 - (180 - constrain(a2 * radTodegree, 0, 360));
+            double deg1 = constrain((Math.PI - a1) * radTodegree, 0, 150);
+            double deg2 = 180 - constrain(a2 * radTodegree, 0, 150);
 
-            
+            double uholNaVypisanie = 180 - deg1;
 
-            textBoxVypisUhly.AppendText("Uhol 1: " + deg1.ToString() + "   " + "Uhol 2: " + deg2.ToString()); // = "Uhol 1: " + deg1.ToString() + "   " + "Uhol 2: " + deg2.ToString();
+            textBoxVypisUhly.AppendText("Uhol 1: " + uholNaVypisanie.ToString() + "   " + "Uhol 2: " + deg2.ToString()); // = "Uhol 1: " + deg1.ToString() + "   " + "Uhol 2: " + deg2.ToString();
             textBoxVypisUhly.AppendText(Environment.NewLine + Environment.NewLine);
 
             if (symbol == 'K')
             {
+                string posliCOM = symbol.ToString() + " s polomerom " + polomerKruznice + "=>" + pise.ToString() + ";" + deg1.ToString() + "," + deg2.ToString();
                 seriovyPort.Open();
                 //   seriovyPort.Write(deg1.ToString() + ";");
-                seriovyPort.WriteLine(symbol.ToString() + " s polomerom " + polomerKruznice + "=>" + pise.ToString() + ";" + deg1.ToString() + "," + deg2.ToString() + Environment.NewLine);
+                // seriovyPort.WriteLine(symbol.ToString() + " s polomerom " + polomerKruznice + "=>" + pise.ToString() + ";" + deg1.ToString() + "," + deg2.ToString() + Environment.NewLine);
+                for (int i = 0; i < posliCOM.Length; i++)
+                {
+                    seriovyPort.Write(posliCOM.ElementAt(i).ToString());
+                    System.Threading.Thread.Sleep(100);
+                }
+                seriovyPort.Write(Environment.NewLine);
                 seriovyPort.Close();
             }
 
             else
             {
+                string posliCOM = symbol.ToString() + "=>" + pise.ToString() + ";" + ((int)uholNaVypisanie).ToString() + "," + ((int)deg2).ToString();
+               // char[] posliCOMchar = posliCOM.ToCharArray();
                 seriovyPort.Open();
                 //   seriovyPort.Write(deg1.ToString() + ";");
-                seriovyPort.WriteLine(symbol.ToString() + "=>" + pise.ToString() + ";" + deg1.ToString() + "," + deg2.ToString() + Environment.NewLine);
+                //seriovyPort.WriteLine(symbol.ToString() + "=>" + pise.ToString() + ";" + uholNaVypisanie.ToString() + "," + deg2.ToString() + Environment.NewLine);
+                for (int i = 0; i < posliCOM.Length; i++) {
+                    seriovyPort.Write(posliCOM.ElementAt(i).ToString());
+                    System.Threading.Thread.Sleep(100);
+                }
+                seriovyPort.Write(Environment.NewLine);
                 seriovyPort.Close();
             }
             
@@ -468,8 +496,8 @@ namespace VRS_Zadanie
         {
             double h = Math.Sqrt(Math.Pow(x, 2) + Math.Pow(y, 2));
             //calculates angles based on desired point
-            double a1 = (getAngle(ARMLENGTH, ARMLENGTH, h) + Math.Atan2(y, x));
-            double a2 = (getAngle(h, ARMLENGTH, ARMLENGTH));
+            double a1 = (getAngle(ARMLENGTH1, ARMLENGTH, h) + Math.Atan2(y, x));
+            double a2 = (getAngle(h, ARMLENGTH, ARMLENGTH1));
             moveServo(a1, a2, symbol, pise);
         }
 

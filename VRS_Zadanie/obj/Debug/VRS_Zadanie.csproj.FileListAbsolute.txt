@@ -1,7 +1,6 @@
 c:\users\tono\documents\visual studio 2015\Projects\VRS_Zadanie\VRS_Zadanie\bin\Debug\VRS_Zadanie.exe.config
 c:\users\tono\documents\visual studio 2015\Projects\VRS_Zadanie\VRS_Zadanie\bin\Debug\VRS_Zadanie.exe
 c:\users\tono\documents\visual studio 2015\Projects\VRS_Zadanie\VRS_Zadanie\bin\Debug\VRS_Zadanie.pdb
-c:\users\tono\documents\visual studio 2015\Projects\VRS_Zadanie\VRS_Zadanie\obj\Debug\VRS_Zadanie.csprojResolveAssemblyReference.cache
 c:\users\tono\documents\visual studio 2015\Projects\VRS_Zadanie\VRS_Zadanie\obj\Debug\VRS_Zadanie.Form1.resources
 c:\users\tono\documents\visual studio 2015\Projects\VRS_Zadanie\VRS_Zadanie\obj\Debug\VRS_Zadanie.Properties.Resources.resources
 c:\users\tono\documents\visual studio 2015\Projects\VRS_Zadanie\VRS_Zadanie\obj\Debug\VRS_Zadanie.csproj.GenerateResource.Cache
