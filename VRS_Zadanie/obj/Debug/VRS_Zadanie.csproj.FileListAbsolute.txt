@@ -6,3 +6,4 @@ c:\users\tono\documents\visual studio 2015\Projects\VRS_Zadanie\VRS_Zadanie\obj\
 c:\users\tono\documents\visual studio 2015\Projects\VRS_Zadanie\VRS_Zadanie\obj\Debug\VRS_Zadanie.csproj.GenerateResource.Cache
 c:\users\tono\documents\visual studio 2015\Projects\VRS_Zadanie\VRS_Zadanie\obj\Debug\VRS_Zadanie.exe
 c:\users\tono\documents\visual studio 2015\Projects\VRS_Zadanie\VRS_Zadanie\obj\Debug\VRS_Zadanie.pdb
+C:\Users\Tono\Documents\Visual Studio 2015\Projects\VRS_Zadanie\VRS_Zadanie\obj\Debug\VRS_Zadanie.csprojResolveAssemblyReference.cache

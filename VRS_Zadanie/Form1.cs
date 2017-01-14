@@ -216,8 +216,6 @@ namespace VRS_Zadanie
 
         private void linearPohyb(string suradnice)
         {
-            //bool znamienkoPonunX = false;
-            //bool znamienkoPonunY = false;
 
             int indexY = suradnice.IndexOf('Y');
             int indexZ = suradnice.IndexOf('Z');
@@ -226,16 +224,11 @@ namespace VRS_Zadanie
             string posunY = suradnice.Substring(indexY + 1, indexZ - indexY - 1);
             string posunZ = suradnice.Substring(indexZ + 1, 4);
 
-            //znamienkoPonunX = posunX.Contains('-') || posunX.Contains('+');
-            //znamienkoPonunY = posunY.Contains('-') || posunY.Contains('+');
-
             double posX = double.Parse(posunX, System.Globalization.CultureInfo.InvariantCulture);
             double posY = double.Parse(posunY, System.Globalization.CultureInfo.InvariantCulture);
             double posZ = double.Parse(posunZ, System.Globalization.CultureInfo.InvariantCulture);
 
             posY = posY * (-1);
-            //posX *= nasobic;
-            //posY *= nasobic;
 
             if (posZ != 0)                               // nema sa kreslit, len sa presunut
             {                           
@@ -258,7 +251,6 @@ namespace VRS_Zadanie
             if (rezimKreslenia == 0)            // ked plati podmienka, kresli od svetoveho suradnicoveho systemu
             {
                 g = Graphics.FromImage(DrawArea);
-                //Pen mypen = new Pen(Color.Black);
                 g.DrawLine(mypen, (float)aktualX, (float)aktualY, (float)posX + (float)svetX, (float)posY + (float)svetY);
                 pictureBox1.Image = DrawArea;
                 g.Dispose();
@@ -270,7 +262,6 @@ namespace VRS_Zadanie
             else if (rezimKreslenia == 1)       // ked plati podmienka, kresli ikrementalne
             {
                 g = Graphics.FromImage(DrawArea);
-                //Pen mypen = new Pen(Color.Black);
                 g.DrawLine(mypen, (float)aktualX, (float)aktualY, (float)posX + (float)aktualX, (float)posY + (float)aktualY);
                 pictureBox1.Image = DrawArea;
                 g.Dispose();
@@ -449,23 +440,24 @@ namespace VRS_Zadanie
 
         private void moveServo(double a1, double a2, char symbol, int pise)
         {
-            //a1 = a1 * degToRadian;
-            //a2 = a2 * degToRadian;
 
             double deg1 = constrain((Math.PI - a1) * radTodegree, 0, 150);
             double deg2 = 180 - constrain(a2 * radTodegree, 0, 150);
 
             double uholNaVypisanie = 180 - deg1;
+            double prepocetZoStupnov1 = uholNaVypisanie * 100/145;      // prepocet pre velky motor
+            prepocetZoStupnov1 = prepocetZoStupnov1 * 263 / 100 + 147;
+
+            double prepocetZoStupnov2 = deg2 * 100 / 150;               // prepocet pre maly motor
+            prepocetZoStupnov2 = prepocetZoStupnov2 * 342 / 100 + 108;
 
             textBoxVypisUhly.AppendText("Uhol 1: " + uholNaVypisanie.ToString() + "   " + "Uhol 2: " + deg2.ToString()); // = "Uhol 1: " + deg1.ToString() + "   " + "Uhol 2: " + deg2.ToString();
             textBoxVypisUhly.AppendText(Environment.NewLine + Environment.NewLine);
 
             if (symbol == 'K')
             {
-                string posliCOM = symbol.ToString() + " s polomerom " + polomerKruznice + "=>" + pise.ToString() + ";" + deg1.ToString() + "," + deg2.ToString();
+                string posliCOM = symbol.ToString() + ",R=" + polomerKruznice + "=>" + pise.ToString() + ";" + ((int)prepocetZoStupnov1).ToString() + "," + ((int)prepocetZoStupnov2).ToString();
                 seriovyPort.Open();
-                //   seriovyPort.Write(deg1.ToString() + ";");
-                // seriovyPort.WriteLine(symbol.ToString() + " s polomerom " + polomerKruznice + "=>" + pise.ToString() + ";" + deg1.ToString() + "," + deg2.ToString() + Environment.NewLine);
                 for (int i = 0; i < posliCOM.Length; i++)
                 {
                     seriovyPort.Write(posliCOM.ElementAt(i).ToString());
@@ -477,11 +469,8 @@ namespace VRS_Zadanie
 
             else
             {
-                string posliCOM = symbol.ToString() + "=>" + pise.ToString() + ";" + ((int)uholNaVypisanie).ToString() + "," + ((int)deg2).ToString();
-               // char[] posliCOMchar = posliCOM.ToCharArray();
+                string posliCOM = symbol.ToString() + "=>" + pise.ToString() + ";" + ((int)prepocetZoStupnov1).ToString() + "," + ((int)prepocetZoStupnov2).ToString();
                 seriovyPort.Open();
-                //   seriovyPort.Write(deg1.ToString() + ";");
-                //seriovyPort.WriteLine(symbol.ToString() + "=>" + pise.ToString() + ";" + uholNaVypisanie.ToString() + "," + deg2.ToString() + Environment.NewLine);
                 for (int i = 0; i < posliCOM.Length; i++) {
                     seriovyPort.Write(posliCOM.ElementAt(i).ToString());
                     System.Threading.Thread.Sleep(100);
