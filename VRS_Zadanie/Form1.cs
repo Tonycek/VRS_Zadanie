@@ -18,7 +18,7 @@ namespace VRS_Zadanie
         private System.IO.StreamReader sr;
         private string[] files;
         private int rezimKreslenia = 0;         // ci sa kresli od svetovych suradnic (0), od aktuanej pozicie (1),...
-        private double aktualX = 0, aktualY = 0, aktualZ = 0;   // aktualne suradnice
+        private double aktualX = 4, aktualY = 4, aktualZ = 0;   // aktualne suradnice
         private double svetX = 100, svetY = 100, svetZ = 0;
         private Bitmap DrawArea;
         private Pen mypen;
@@ -30,6 +30,8 @@ namespace VRS_Zadanie
         private const double degToRadian = Math.PI / 180;
         private SerialPort seriovyPort;
         private double polomerKruznice = 0;
+        private int predchadzajuciX = 0;
+        private int predchadzajuciY = 0;
 
         public Form1()
         {
@@ -101,7 +103,7 @@ namespace VRS_Zadanie
             g.Clear(Color.White);
             g.Dispose();
             mypen = new Pen(Color.Black);
-            aktualY = this.DrawArea.Height - aktualY;
+            //aktualY = 0;// this.DrawArea.Height - aktualY;
         }
 
         private void spracujKod(string riadok)
@@ -228,7 +230,10 @@ namespace VRS_Zadanie
             double posY = double.Parse(posunY, System.Globalization.CultureInfo.InvariantCulture);
             double posZ = double.Parse(posunZ, System.Globalization.CultureInfo.InvariantCulture);
 
-            posY = posY * (-1);
+            //posY = posY * (-1);
+
+            predchadzajuciX = (int)aktualX;
+            predchadzajuciY = (int)aktualY;
 
             if (posZ != 0)                               // nema sa kreslit, len sa presunut
             {                           
@@ -270,7 +275,17 @@ namespace VRS_Zadanie
                 aktualY = posY + aktualY;
             }
 
-            armTo(aktualX, DrawArea.Height - aktualY,'L', 0);
+
+            double posuvacX = (aktualX - predchadzajuciX) / 6;
+            double posuvacY = (aktualY - predchadzajuciY) / 6;
+
+            for (int q = 0; q < 6; q++)
+            {
+                double x1 = (predchadzajuciX) +posuvacX * q;
+                double y1 = (predchadzajuciY) + posuvacY * q;
+              //  armTo((aktualX- predchadzajuciX) +posuvacX*q,((300-aktualY)- predchadzajuciY) +posuvacY*q,'L',0);
+                armTo(x1,y1, 'L', 0);
+            }
         }
 
         private void kruznica(string suradnice) {
@@ -299,7 +314,32 @@ namespace VRS_Zadanie
 
             double iujf = DrawArea.Height;
             double fiune = DrawArea.Width;
-            armTo(bodX, bodY, 'K', 1);
+
+            //aktualX = aktualX + posX;
+            //double positionY = aktualY;
+            //aktualY = aktualY + posY;
+            //positionY = (300 - positionY) + posY;
+            aktualX = aktualX + posX;
+            aktualY = aktualY + posY;
+
+            double xStart = aktualX - polomerKruznice;
+            double xFinish = polomerKruznice + aktualX;
+            double y = 0.0;
+            double r_sq = polomerKruznice * polomerKruznice;
+
+            for (double x = xStart; x <= xFinish; x += 1)
+            {
+                y = aktualY + Math.Sqrt(r_sq - ((x - aktualX) * (x - aktualX)));
+                armTo(x,y,'K',0);
+            }
+
+            for (double x = xFinish; x >= xStart; x -= 1)
+            {
+                y = aktualY - Math.Sqrt(r_sq - ((x - aktualX) * (x - aktualX)));
+                armTo(x, y, 'K', 0);
+            }
+
+            armTo(aktualX, aktualY, 'L', 0);
             //aktualX = aktualX - polomer / 2;
             //aktualY = aktualY - polomer / 2;
         }
@@ -411,8 +451,8 @@ namespace VRS_Zadanie
 
         private void button1_Click(object sender, EventArgs e)
         {
-            aktualX = 0;
-            aktualY = 300;
+            aktualX = 4;
+            aktualY = 4;
             aktualZ = 0;
             textBox1.Text = "";
             textBox1.Refresh();
@@ -487,6 +527,7 @@ namespace VRS_Zadanie
             //calculates angles based on desired point
             double a1 = (getAngle(ARMLENGTH1, ARMLENGTH, h) + Math.Atan2(y, x));
             double a2 = (getAngle(h, ARMLENGTH, ARMLENGTH1));
+
             moveServo(a1, a2, symbol, pise);
         }
 

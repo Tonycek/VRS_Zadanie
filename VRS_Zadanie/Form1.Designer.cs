@@ -78,7 +78,7 @@
             this.textBoxVypisUhly.Location = new System.Drawing.Point(249, 12);
             this.textBoxVypisUhly.Multiline = true;
             this.textBoxVypisUhly.Name = "textBoxVypisUhly";
-            this.textBoxVypisUhly.Size = new System.Drawing.Size(235, 265);
+            this.textBoxVypisUhly.Size = new System.Drawing.Size(295, 265);
             this.textBoxVypisUhly.TabIndex = 3;
             // 
             // listBoxZoznamPortov
@@ -146,7 +146,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(501, 430);
+            this.ClientSize = new System.Drawing.Size(556, 430);
             this.Controls.Add(this.btnReset);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
