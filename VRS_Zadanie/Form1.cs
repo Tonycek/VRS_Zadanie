@@ -17,15 +17,15 @@ namespace VRS_Zadanie
         private String line;
         private System.IO.StreamReader sr;
         private string[] files;
-        private int rezimKreslenia = 0;         // ci sa kresli od svetovych suradnic (0), od aktuanej pozicie (1),...
+        private int rezimKreslenia = 1;         // ci sa kresli od svetovych suradnic (0), od aktuanej pozicie (1),...
         private double aktualX = 4, aktualY = 4, aktualZ = 0;   // aktualne suradnice
         private double svetX = 100, svetY = 100, svetZ = 0;
         private Bitmap DrawArea;
         private Pen mypen;
         private Graphics g;
         private int nasobic = 15;
-        private int ARMLENGTH = 5;
-        private int ARMLENGTH1 = 3;
+        private double ARMLENGTH = 5;
+        private double ARMLENGTH1 = 3;
         private const double radTodegree = 180 / Math.PI;
         private const double degToRadian = Math.PI / 180;
         private SerialPort seriovyPort;
@@ -75,8 +75,8 @@ namespace VRS_Zadanie
                 seriovyPort = new SerialPort(port, 4800, Parity.None, 8, StopBits.One);
                 sr = new System.IO.StreamReader(files[0]);          // znovu idem citat GCODE ktory uz mam ulozeny v premennej files[0]
 
-                ARMLENGTH = Int32.Parse(tbRameno1.Text);
-                ARMLENGTH1 = Int32.Parse(tbRameno2.Text);
+                ARMLENGTH = Double.Parse(tbRameno1.Text);// Int32.Parse(tbRameno1.Text);
+                ARMLENGTH1 = Double.Parse(tbRameno2.Text);// Int32.Parse(tbRameno2.Text);
 
                 string riadok;
 
@@ -249,7 +249,7 @@ namespace VRS_Zadanie
                     aktualY = posY + aktualY;
                 }
 
-                armTo(aktualX, DrawArea.Height - aktualY, 'L', 1);
+                armTo(aktualX, aktualY, 'L', 1);
                 return;
             }
 
@@ -276,10 +276,10 @@ namespace VRS_Zadanie
             }
 
 
-            double posuvacX = (aktualX - predchadzajuciX) / 6;
-            double posuvacY = (aktualY - predchadzajuciY) / 6;
+            double posuvacX = (aktualX - predchadzajuciX) / 14;
+            double posuvacY = (aktualY - predchadzajuciY) / 14;
 
-            for (int q = 0; q < 6; q++)
+            for (int q = 0; q < 15; q++)
             {
                 double x1 = (predchadzajuciX) +posuvacX * q;
                 double y1 = (predchadzajuciY) + posuvacY * q;
@@ -289,7 +289,6 @@ namespace VRS_Zadanie
         }
 
         private void kruznica(string suradnice) {
-            g = Graphics.FromImage(DrawArea);
             int indexX = suradnice.IndexOf('X');
             int indexY = suradnice.IndexOf('Y');
             int indexR = suradnice.IndexOf('R');
@@ -297,18 +296,12 @@ namespace VRS_Zadanie
             string posunX = suradnice.Substring(1, indexY - indexX - 1);
             string posunY = suradnice.Substring(indexY + 1, indexR - indexY - 1);
             string radius = suradnice.Substring(indexR + 1, suradnice.Length - indexR - 1);
-            //string centerY = suradnice.Substring(indexR + 1, 4);
 
             double posX = double.Parse(posunX, System.Globalization.CultureInfo.InvariantCulture);
             double posY = double.Parse(posunY, System.Globalization.CultureInfo.InvariantCulture);
             double polomer = double.Parse(radius, System.Globalization.CultureInfo.InvariantCulture);
-            //double centY = double.Parse(centerY, System.Globalization.CultureInfo.InvariantCulture);
             polomerKruznice = polomer;
-            //posY = (-1) * posY;          // prepocitavanie osi y, pretoze v bitmape je v tejto osi opacne + a -
-            //centY = DrawArea.Height - centY;
-            g.DrawEllipse(mypen, (float)aktualX - (float)polomer + (float)posX , (float)aktualY - (float)polomer - (float)posY, (float)polomer*2, (float)polomer*2); //
-            //g.DrawEllipse(mypen, ((float)aktualX - (float)polomer), ((float)aktualY - (float)polomer), (float)polomer, (float)polomer); //
-            g.DrawLine(mypen, (float)0, (float)-10, (float)300, (float)310);
+
             double bodX = aktualX + posX;
             double bodY =  DrawArea.Height - aktualY + posY;
 
@@ -326,20 +319,22 @@ namespace VRS_Zadanie
             double xFinish = polomerKruznice + aktualX;
             double y = 0.0;
             double r_sq = polomerKruznice * polomerKruznice;
+        //    double Xpo;
 
-            for (double x = xStart; x <= xFinish; x += 1)
+            for (double x = xStart; x <= xFinish; x += 0.02)
             {
                 y = aktualY + Math.Sqrt(r_sq - ((x - aktualX) * (x - aktualX)));
                 armTo(x,y,'K',0);
             }
 
-            for (double x = xFinish; x >= xStart; x -= 1)
+            for (double x = xFinish; x >= xStart; x -= 0.02)
             {
                 y = aktualY - Math.Sqrt(r_sq - ((x - aktualX) * (x - aktualX)));
-                armTo(x, y, 'K', 0);
+              //  Xpo = x;
+                armTo(x, y, 'K', 0);              
             }
 
-            armTo(aktualX, aktualY, 'L', 0);
+            armTo(aktualX, aktualY, 'L', 1);
             //aktualX = aktualX - polomer / 2;
             //aktualY = aktualY - polomer / 2;
         }
@@ -485,23 +480,34 @@ namespace VRS_Zadanie
             double deg2 = 180 - constrain(a2 * radTodegree, 0, 150);
 
             double uholNaVypisanie = 180 - deg1;
+
+            if (uholNaVypisanie > 145 || deg2 > 150)
+            {
+                Console.WriteLine("ahoh");
+            }
+
             double prepocetZoStupnov1 = uholNaVypisanie * 100/145;      // prepocet pre velky motor
-            prepocetZoStupnov1 = prepocetZoStupnov1 * 263 / 100 + 147;
+            //prepocetZoStupnov1 = prepocetZoStupnov1 * 263 / 100 + 147;
+            prepocetZoStupnov1 = prepocetZoStupnov1 * 1250 / 100 + 800;
 
             double prepocetZoStupnov2 = deg2 * 100 / 150;               // prepocet pre maly motor
-            prepocetZoStupnov2 = prepocetZoStupnov2 * 342 / 100 + 108;
+            prepocetZoStupnov2 = prepocetZoStupnov2 * 1500 / 100 + 600;
 
             textBoxVypisUhly.AppendText("Uhol 1: " + uholNaVypisanie.ToString() + "   " + "Uhol 2: " + deg2.ToString()); // = "Uhol 1: " + deg1.ToString() + "   " + "Uhol 2: " + deg2.ToString();
             textBoxVypisUhly.AppendText(Environment.NewLine + Environment.NewLine);
 
+            //string s = string.Format("{0:N2}%", x);
+
             if (symbol == 'K')
             {
-                string posliCOM = symbol.ToString() + ",R=" + polomerKruznice + "=>" + pise.ToString() + ";" + ((int)prepocetZoStupnov1).ToString() + "," + ((int)prepocetZoStupnov2).ToString();
+                string temp = ((int)prepocetZoStupnov1).ToString().PadLeft(4, '0');
+                string temp2 = ((int)prepocetZoStupnov2).ToString().PadLeft(4, '0');
+                string posliCOM = symbol.ToString() + ",R=" + polomerKruznice + "=>" + pise.ToString() + ";" + temp + "," + temp2;
                 seriovyPort.Open();
                 for (int i = 0; i < posliCOM.Length; i++)
                 {
                     seriovyPort.Write(posliCOM.ElementAt(i).ToString());
-                    System.Threading.Thread.Sleep(100);
+                    System.Threading.Thread.Sleep(10);
                 }
                 seriovyPort.Write(Environment.NewLine);
                 seriovyPort.Close();
@@ -509,11 +515,13 @@ namespace VRS_Zadanie
 
             else
             {
-                string posliCOM = symbol.ToString() + "=>" + pise.ToString() + ";" + ((int)prepocetZoStupnov1).ToString() + "," + ((int)prepocetZoStupnov2).ToString();
+                string temp = ((int)prepocetZoStupnov1).ToString().PadLeft(4, '0');
+                string temp2 = ((int)prepocetZoStupnov2).ToString().PadLeft(4, '0');
+                string posliCOM = symbol.ToString() + "=>" + pise.ToString() + ";" + temp + "," + temp2;
                 seriovyPort.Open();
                 for (int i = 0; i < posliCOM.Length; i++) {
                     seriovyPort.Write(posliCOM.ElementAt(i).ToString());
-                    System.Threading.Thread.Sleep(100);
+                    System.Threading.Thread.Sleep(10);
                 }
                 seriovyPort.Write(Environment.NewLine);
                 seriovyPort.Close();
